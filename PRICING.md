@@ -100,6 +100,7 @@ Total S3 costs: $1.41/mo
 ## Other costs
 
 GoDaddy DNS registration: $18/year (reserving redditloans.com)
+
 DNS Privacy registration: $10/year (reduces how much email spam I get somewhat)
 
 $28/year = $2.33/mo
@@ -112,5 +113,7 @@ $28/year = $2.33/mo
 - Website Registration: $2.33/mo
 
 Estimated net before taxes: $59.41/mo
+
 Estimated taxes (11%): $6.53/mo
+
 Estiamted net after taxes: $65.94/mo
