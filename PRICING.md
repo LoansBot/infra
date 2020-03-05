@@ -48,13 +48,16 @@ prices are based on usage All services run on the default AWS linux AMI.
 All numbers are derived from
 [the simple monthly calculator](https://calculator.s3.amazonaws.com/index.html).
 
-- Nginx: `t3a.micro` (2 vCPU @ 10%, 1gb mem) at $3.44/mo
-- Web worker: 1 `t3a.small` (2 vCPU @ 20%, 2gb mem) running 16 actual workers at $6.87/mo
-- Memcached: `t3a.nano` (2 vCPU @ 5%, 512mb mem) at $1.68/mo
-- Postgres: `m5a.large` (2 vCPU @ 100%, 8gb mem) at $31.39/mo
-- RabbitMQ: `t3a.nano` (2 vCPU @ 5%, 512mb mem) at $1.68/mo
-- Reddit-Proxy: `t3a.nano` (2 vCPU @ 5%, 512mb mem) at $1.68/mo
-- LoansBot: `t3a.nano` (2 vCPU @ 5%, 512mb mem) at $1.68/mo
+Each instance has an associated minimum EBS volume of 8gb at $0.10/gb/mo
+
+- Nginx: `t3a.micro` (2 vCPU @ 10%, 1gb mem) at $3.44/mo + $0.80/mo
+- Web worker: 1 `t3a.small` (2 vCPU @ 20%, 2gb mem) running 16 actual workers at $6.87/mo + $0.80/mo
+- Memcached: `t3a.nano` (2 vCPU @ 5%, 512mb mem) at $1.68/mo + $0.80/mo
+- Postgres: `m5a.large` (2 vCPU @ 100%, 8gb mem) at $31.39/mo + $0.80/mo
+- RabbitMQ: `t3a.nano` (2 vCPU @ 5%, 512mb mem) at $1.68/mo + $0.80/mo
+- Reddit-Proxy: `t3a.nano` (2 vCPU @ 5%, 512mb mem) at $1.68/mo + $0.80/mo
+- LoansBot: `t3a.nano` (2 vCPU @ 5%, 512mb mem) at $1.68/mo + $0.80/mo
+- NAT Instance: `t3a.nano` (2 vCPU @ 5%, 512mb mem) at $1.68/mo + $0.80/mo
 
 Transfer estimates:
 
@@ -107,13 +110,13 @@ $28/year = $2.33/mo
 
 ## Total Cost Estimates
 
-- EC2 Instances: $48.42/mo
+- EC2 Instances: $56.50/mo
 - EC2 Data Transfer Out: $7.25/mo
 - S3: $1.41/mo
 - Website Registration: $2.33/mo
 
-Estimated net before taxes: $59.41/mo
+Estimated net before taxes: $67.49/mo
 
-Estimated taxes (11%): $6.53/mo
+Estimated taxes (11%): $7.42/mo
 
-Estiamted net after taxes: $65.94/mo
+Estiamted net after taxes: $74.91/mo
