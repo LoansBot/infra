@@ -20,7 +20,12 @@ cd memcached-1.5.22  # match whatever was extracted
 make
 sudo make install
 cd ~
-sudo /usr/local/bin/memcached -d -m 256 -u root -p 11211 -l 10.0.0.62
+echo "sudo /usr/local/bin/memcached -d -m 256 -u root -p 11211 -l 10.0.0.62" > init_memcached
+chmod +x init_memcached
+sudo chown root init_memcached
+sudo chgrp root init_memcached
+sudo ./init_memcached
+sudo crontab -e  # @reboot /home/ec2-user/init_memcached
 ```
 
 Testing (usually done via the bastion)
