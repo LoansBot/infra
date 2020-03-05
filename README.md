@@ -16,9 +16,10 @@ the centralized data store.
 
 Summary: Within the blue box is one VPC with two subnets. One of the subnets
 is fully public (i.e., connections are allowed in/out) and contains just the
-Nginx server. The other subnet is everything in the pink box, and contains
-an egress-only gateway: connections are allowed out but not in. Two services
-are connected by a line if they communicate.
+Nginx server. The other subnet is everything in the pink box, and connects
+to a NAT Gateway rather than directly communicating with the outside world,
+and hence is e-gress only. Two services are connected by a line if they
+communicate.
 
 ## Services
 
