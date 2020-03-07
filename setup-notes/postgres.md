@@ -18,7 +18,8 @@ sudo -u postgres createuser -P -s -e ec2-user
 ```
 
 ```bash
-sudo vim /var/lib/pgsql/data/pg_hba.conf  # change from ident to password auth
+sudo vim /var/lib/pgsql/data/pg_hba.conf  # change from ident to password auth, allow password auth on 10.0.0.0/24
+sudo vim /var/lib/pgsql/data/postgresql.conf  # listen_addresses='localhost' becomes listen_addresses='10.0.0.47'
 sudo service postgresql restart
 ```
 
