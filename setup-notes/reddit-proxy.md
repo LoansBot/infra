@@ -9,12 +9,14 @@ Create a file `secrets.sh` which looks like the following (except filled in)
 
 ```bash
 #!/usr/bin/env bash
-export USER_AGENT=linux:com.redditloans:v2.0.0 (by /u/Tjstretchalot)
+export USER_AGENT="linux:com.redditloans:v2.0.0 (by /u/Tjstretchalot)"
 export APPNAME=reddit-proxy
 export PGHOST=10.0.0.47
 export PGPORT=5432
 export PGUSER=ec2-user
 export PGPASSWORD=postgres
+export PGDATABASE=postgres
+export PYTHON_ARGS=-u
 export AMQP_HOST=10.0.0.49
 export AMQP_PORT=5672
 export AMQP_USERNAME=guest
