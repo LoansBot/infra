@@ -1,7 +1,8 @@
-# Reddit Proxy
+# LoansBot
 
-The reddit-proxy listens on a particular queue from the AMQP server and proxies
-the request to reddit. It sends logs to the database.
+The LoansBot server requests and processes information from the reddit-proxy to
+handle commands and other triggers which are posted on monitored reddit
+servers.
 
 ## Setup
 
@@ -9,26 +10,24 @@ Create a file `secrets.sh` which looks like the following (except filled in)
 
 ```bash
 #!/usr/bin/env bash
-export USER_AGENT="linux:com.redditloans:v2.0.0 (by /u/Tjstretchalot)"
-export APPNAME=reddit-proxy
+export APPNAME=loansbot
+export AMQP_HOST=10.0.0.49
+export AMQP_VHOST=/
+export AMQP_PORT=5672
+export AMQP_USERNAME=guest
+export AMQP_PASSWORD=guest
+export AMQP_REDDIT_PROXY_QUEUE=rproxy
+export AMQP_RESPONSE_QUEUE_PREFIX=loansbot
 export PGHOST=10.0.0.47
 export PGPORT=5432
 export PGUSER=ec2-user
 export PGPASSWORD=postgres
 export PGDATABASE=postgres
+export SUBREDDITS=borrow,loansbot,borrowcommands
+export MEMCACHED_HOST=10.0.0.62
+export MEMCACHED_PORT=11211
 export PYTHON_COMMAND=python3
 export PYTHON_ARGS=-u
-export AMQP_HOST=10.0.0.49
-export AMQP_PORT=5672
-export AMQP_USERNAME=guest
-export AMQP_PASSWORD=guest
-export AMQP_VHOST=/
-export AMQP_QUEUE=rproxy
-export MIN_TIME_BETWEEN_REQUESTS_S=2
-export REDDIT_USERNAME=LoansBot
-export REDDIT_PASSWORD=
-export REDDIT_CLIENT_ID=
-export REDDIT_CLIENT_SECRET=
 ```
 
 ```bash
