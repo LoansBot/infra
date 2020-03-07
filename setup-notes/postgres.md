@@ -9,6 +9,17 @@ daily. We also run our migrations on the database server.
 sudo yum -y update
 sudo yum -y install postgresql postgresql-server postgresql-devel postgresql-contrib postgresql-docs
 sudo postgresql-setup initdb
+sudo service postgresql start
+```
+
+```bash
+sudo -u postgres createuser -P -s -e ec2-user
+# set the password
+```
+
+```bash
+sudo vim /var/lib/pgsql/data/pg_hba.conf  # change from ident to password auth
+sudo service postgresql restart
 ```
 
 Create a file `secrets.sh` which looks like the following (except filled in)
@@ -17,7 +28,7 @@ Create a file `secrets.sh` which looks like the following (except filled in)
 #!/usr/bin/env bash
 export DATABASE_HOST=localhost
 export DATABASE_PORT=5432
-export DATABASE_USER=postgres
+export DATABASE_USER=ec2-user
 export DATABASE_PASSWORD=postgres
 export DATABASE_DBNAME=postgres
 export AWS_ACCESS_KEY=
