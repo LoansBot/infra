@@ -42,3 +42,16 @@ sudo service codedeploy-agent status
 # Should get The AWS CodeDeploy agent is running
 # if not, sudo service codedeploy-agent start
 ```
+
+Then once the codedeploy agent installs the library
+
+```bash
+echo "#/usr/bin/env bash" > create_backup.sh
+echo "cd /webapps/dbhelpers/src" >> create_backup.sh
+echo ". /home/ec2-user/secrets.sh" >> create_backup.sh
+echo "python3 create_backup.py" >> create_backup.sh
+sudo chmod +x create_backup.sh
+sudo chown root create_backup.sh
+sudo chgrp root create_backup.sh
+echo "0 0 * * * /home/ec2-user/create_backup.sh" | sudo crontab -
+```
