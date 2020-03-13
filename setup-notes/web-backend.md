@@ -24,6 +24,9 @@ export AMQP_REDDIT_PROXY_QUEUE=rproxy
 export AMQP_VHOST=/
 export MEMCACHED_HOST=10.0.0.62
 export MEMCACHED_PORT=11211
+export WEB_CONCURRENCY=16
+export WEBHOST=localhost
+export WEBPORT=8000
 ```
 
 ```bash
@@ -38,4 +41,43 @@ sudo chmod +x ./install
 sudo ./install auto
 sleep 1
 sudo service codedeploy-agent status
+echo "@reboot /webapps/lbapi/after_install.sh ; /webapps/lbapi/application_start.sh" | sudo crontab -
+```
+
+## Complete setup script
+
+```bash
+#!/usr/bin/env bash
+cd /home/ec2-user
+echo '#!/usr/bin/env bash' > secrets.sh
+echo "export APPNAME=web-backend" >> secrets.sh
+echo "export PGHOST=10.0.0.47" >> secrets.sh
+echo "export PGPORT=5432" >> secrets.sh
+echo "export PGDATABASE=postgres" >> secrets.sh
+echo "export PGUSER=ec2-user" >> secrets.sh
+echo "export PGPASSWORD=postgres" >> secrets.sh
+echo "export AMQP_HOST=10.0.0.49" >> secrets.sh
+echo "export AMQP_PORT=5672" >> secrets.sh
+echo "export AMQP_USERNAME=guest" >> secrets.sh
+echo "export AMQP_PASSWORD=guest" >> secrets.sh
+echo "export AMQP_REDDIT_PROXY_QUEUE=rproxy" >> secrets.sh
+echo "export AMQP_VHOST=/" >> secrets.sh
+echo "export MEMCACHED_HOST=10.0.0.62" >> secrets.sh
+echo "export MEMCACHED_PORT=11211" >> secrets.sh
+echo "export WEB_CONCURRENCY=16" >> secrets.sh
+export WEBHOST=$(hostname -i | grep -Eo '10(\.[0-9]+){3}')
+echo "export WEBHOST=$WEBHOST" >> secrets.sh
+echo "export WEBPORT=8000" >> secrets.sh
+sudo chmod +x secrets.sh
+sudo chown root secrets.sh
+sudo chgrp root secrets.sh
+sudo yum -y update
+sudo yum -y install ruby
+sudo yum -y install wget
+wget https://aws-codedeploy-us-west-2.s3.us-west-2.amazonaws.com/latest/install
+sudo chmod +x ./install
+sudo ./install auto
+sleep 1
+sudo service codedeploy-agent status
+echo "@reboot /webapps/lbapi/after_install.sh ; /webapps/lbapi/application_start.sh" | sudo crontab -
 ```

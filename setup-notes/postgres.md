@@ -32,6 +32,11 @@ export DATABASE_PORT=5432
 export DATABASE_USER=ec2-user
 export DATABASE_PASSWORD=postgres
 export DATABASE_DBNAME=postgres
+export PGHOST=localhost
+export PGPORT=5432
+export PGUSER=ec2-user
+export PGPASSWORD=postgres
+export PGDATABASE=postgres
 export AWS_ACCESS_KEY=
 export AWS_SECRET_KEY=
 export AWS_S3_BUCKET=
@@ -65,5 +70,17 @@ echo "python3 create_backup.py" >> create_backup.sh
 sudo chmod +x create_backup.sh
 sudo chown root create_backup.sh
 sudo chgrp root create_backup.sh
-echo "0 0 * * * /home/ec2-user/create_backup.sh" | sudo crontab -
+
+echo "#/usr/bin/env bash" > clean_expire_tables.sh
+echo ". /home/ec2-user/secrets.sh" >> clean_expire_tables.sh
+echo "psql -c \"DELETE FROM authtokens WHERE expires_at < NOW()\"" >> clean_expire_tables.sh
+echo "psql -c \"DELETE FROM claim_tokens WHERE expires_at < NOW()\"" >> clean_expire_tables.sh
+sudo chmod +x clean_expire_tables.sh
+sudo chown root clean_expire_tables.sh
+sudo chgrp root clean_expire_tables.sh
+
+echo "0 0 * * * /home/ec2-user/create_backup.sh" > dbcron
+echo "0 * * * * /home/ec2-user/clean_expire_tables.sh" >> dbcron
+sudo crontab dbcron
+sudo rm dbcron
 ```
