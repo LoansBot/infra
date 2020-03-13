@@ -50,12 +50,8 @@ handled by a third-party (Amazon). For the other data stores, we purchase the in
   to raw sockets. Furthermore, going through rabbit mq allows for a large body
   of metrics (throughput, number in queue, etc) that would not otherwise be
   simple to get.
-- The S3 bucket. The entire front-end is stored on S3, hence when you visit
-  `https://redditloans.com` the HTML, JS, and CSS response that you receive
-  are being served directly from S3 without any server-side processing.
-  Beyond the front-end, S3 is also used for backups for the postgres database
-  and log backups. Finally, the S3 bucket can be used as an alternative caching
-  service for extremely large downloads (such as all loans before X).
+- The S3 bucket. Backups are stored here, and large assets such as images
+  or videos are served from here.
 
 ### Other Pre-Built Services
 
