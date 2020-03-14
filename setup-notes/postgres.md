@@ -7,9 +7,11 @@ daily. We also run our migrations on the database server.
 
 ```bash
 sudo yum -y update
+sudo amazon-linux-extras enable postgresql11
 sudo amazon-linux-extras install -y docker
+sudo yum install -y postgresql
 sudo service docker start
-sudo docker run --name postgres -e POSTGRES_USER='ec2-user' -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=postgres -d -p 5432:5432 postgres:12.2
+sudo docker run --name postgres -e POSTGRES_USER='ec2-user' -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=postgres -d -p 5432:5432 postgres:11.5
 ```
 
 Create a file `secrets.sh` which looks like the following (except filled in)
