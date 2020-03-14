@@ -29,6 +29,7 @@ export WEBHOST=localhost
 export WEBPORT=8000
 export ROOT_DOMAIN=https://redditloans.com
 export APP_VERSION_NUMBER=$(date --utc +%s)
+export UVICORN_PATH=/usr/local/bin/uvicorn
 ```
 
 ```bash
@@ -43,7 +44,10 @@ sudo chmod +x ./install
 sudo ./install auto
 sleep 1
 sudo service codedeploy-agent status
-echo "@reboot /webapps/lbapi/after_install.sh ; /webapps/lbapi/application_start.sh" | sudo crontab -
+echo "@reboot /webapps/lbapi/after_install.sh ; /webapps/lbapi/application_start.sh" > cronjbs
+echo "@daily yum update -y" >> cronjbs
+sudo crontab cronjbs
+rm cronjbs
 ```
 
 ## Complete setup script
@@ -72,6 +76,7 @@ echo "export WEBHOST=$WEBHOST" >> secrets.sh
 echo "export WEBPORT=8000" >> secrets.sh
 echo "export ROOT_DOMAIN=https://redditloans.com" >> secrets.sh
 echo "export APP_VERSION_NUMBER=$(date --utc +%s)" >> secrets.sh
+echo "export UVICORN_PATH=/usr/local/bin/uvicorn" >> secrets.sh
 sudo chmod +x secrets.sh
 sudo chown root secrets.sh
 sudo chgrp root secrets.sh
