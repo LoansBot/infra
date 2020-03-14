@@ -7,20 +7,9 @@ daily. We also run our migrations on the database server.
 
 ```bash
 sudo yum -y update
-sudo yum -y install postgresql postgresql-server postgresql-devel postgresql-contrib postgresql-docs
-sudo postgresql-setup initdb
-sudo service postgresql start
-```
-
-```bash
-sudo -u postgres createuser -P -s -e ec2-user
-# set the password
-```
-
-```bash
-sudo vim /var/lib/pgsql/data/pg_hba.conf  # change from ident to password auth, allow password auth on 10.0.0.0/24
-sudo vim /var/lib/pgsql/data/postgresql.conf  # listen_addresses='localhost' becomes listen_addresses='10.0.0.47'
-sudo service postgresql restart
+sudo amazon-linux-extras install -y docker
+sudo service docker start
+sudo docker run --name postgres -e POSTGRES_USER='ec2-user' -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=postgres -d -p 5432:5432 postgres:12.2
 ```
 
 Create a file `secrets.sh` which looks like the following (except filled in)
@@ -79,7 +68,8 @@ sudo chmod +x clean_expire_tables.sh
 sudo chown root clean_expire_tables.sh
 sudo chgrp root clean_expire_tables.sh
 
-echo "0 0 * * * /home/ec2-user/create_backup.sh" > dbcron
+echo "@reboot service docker start; docker start postgres" > dbcron
+echo "0 0 * * * /home/ec2-user/create_backup.sh" >> dbcron
 echo "0 * * * * /home/ec2-user/clean_expire_tables.sh" >> dbcron
 sudo crontab dbcron
 sudo rm dbcron
