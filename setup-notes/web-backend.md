@@ -27,6 +27,8 @@ export MEMCACHED_PORT=11211
 export WEB_CONCURRENCY=16
 export WEBHOST=localhost
 export WEBPORT=8000
+export ROOT_DOMAIN=https://redditloans.com
+export APP_VERSION_NUMBER=$(date --utc +%s)
 ```
 
 ```bash
@@ -68,6 +70,8 @@ echo "export WEB_CONCURRENCY=16" >> secrets.sh
 export WEBHOST=$(hostname -i | grep -Eo '10(\.[0-9]+){3}')
 echo "export WEBHOST=$WEBHOST" >> secrets.sh
 echo "export WEBPORT=8000" >> secrets.sh
+echo "export ROOT_DOMAIN=https://redditloans.com" >> secrets.sh
+echo "export APP_VERSION_NUMBER=$(date --utc +%s)" >> secrets.sh
 sudo chmod +x secrets.sh
 sudo chown root secrets.sh
 sudo chgrp root secrets.sh
@@ -79,5 +83,8 @@ sudo chmod +x ./install
 sudo ./install auto
 sleep 1
 sudo service codedeploy-agent status
-echo "@reboot /webapps/lbapi/after_install.sh ; /webapps/lbapi/application_start.sh" | sudo crontab -
+echo "@reboot /webapps/lbapi/after_install.sh ; /webapps/lbapi/application_start.sh" > cronjbs
+echo "@daily yum update -y" >> cronjbs
+sudo crontab cronjbs
+rm cronjbs
 ```
