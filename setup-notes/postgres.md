@@ -8,6 +8,7 @@ daily. We also run our migrations on the database server.
 ```bash
 sudo yum -y update
 sudo amazon-linux-extras enable postgresql11
+sudo yum clean metadata
 sudo amazon-linux-extras install -y docker
 sudo yum install -y postgresql
 sudo service docker start
