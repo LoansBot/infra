@@ -24,4 +24,13 @@ sudo chmod +x ./install
 sudo ./install auto
 sleep 1
 sudo service codedeploy-agent status
+echo "@daily yum update -y" > cronjbs
+sudo crontab cronjbs
+rm cronjbs
+```
+
+```bash
+wget https://dl.eff.org/certbot-auto
+chmod a+x certbot-auto
+sudo ./certbot-auto --nginx -d staging.redditloans.com
 ```
