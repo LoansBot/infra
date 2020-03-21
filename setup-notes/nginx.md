@@ -16,6 +16,29 @@ sudo service nginx restart
 echo "@reboot service nginx start" | sudo crontab -
 ```
 
+Configure caching and proxy in /etc/nginx/nginx.conf. Suggested
+format is something like the following, which will set a 1 day
+cache and disable the pre-HTTP/1.1 style caching.
+
+```conf
+        location ^~ /api/ {
+            proxy_pass http://10.0.0.38:8000/;
+        }
+
+        location / {
+            etag off;
+            if_modified_since off;
+            add_header Last-Modified "";
+            add_header Cache-Control "public, max-age=86400, stale-while-revalidate=604800, stale-if-error=604800";
+        }
+```
+
+And reload the service
+
+```bash
+sudo nginx -t && sudo service nginx reload
+```
+
 ```bash
 sudo yum -y install ruby
 sudo yum -y install wget
