@@ -67,13 +67,15 @@ echo "#/usr/bin/env bash" > clean_expire_tables.sh
 echo ". /home/ec2-user/secrets.sh" >> clean_expire_tables.sh
 echo "psql -c \"DELETE FROM authtokens WHERE expires_at < NOW()\"" >> clean_expire_tables.sh
 echo "psql -c \"DELETE FROM claim_tokens WHERE expires_at < NOW()\"" >> clean_expire_tables.sh
+echo "psql -c \"DELETE FROM log_events WHERE created_at < NOW() - INTERVAL '7 days'\"" >> clean_expire_tables.sh
 sudo chmod +x clean_expire_tables.sh
 sudo chown root clean_expire_tables.sh
 sudo chgrp root clean_expire_tables.sh
 
 echo "@reboot service docker start; docker start postgres" > dbcron
-echo "0 0 * * * /home/ec2-user/create_backup.sh" >> dbcron
-echo "0 * * * * /home/ec2-user/clean_expire_tables.sh" >> dbcron
+echo "@daily yum update -y" >> dbcron
+echo "@daily /home/ec2-user/create_backup.sh" >> dbcron
+echo "@hourly /home/ec2-user/clean_expire_tables.sh" >> dbcron
 sudo crontab dbcron
 sudo rm dbcron
 ```
