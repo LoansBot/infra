@@ -32,7 +32,7 @@ export APP_VERSION_NUMBER=$(date --utc +%s)
 export UVICORN_PATH=/usr/local/bin/uvicorn
 export RATELIMIT_DISABLED=0
 export HUMAN_PASSWORD_ITERS=1000000
-export HCAPTCHA_SECRET=
+export HCAPTCHA_SECRET_KEY=
 export HCAPTCHA_DISABLED=0
 ```
 
@@ -83,7 +83,7 @@ echo "export APP_VERSION_NUMBER=$(date --utc +%s)" >> secrets.sh
 echo "export UVICORN_PATH=/usr/local/bin/uvicorn" >> secrets.sh
 echo "export RATELIMIT_DISABLED=0" >> secrets.sh
 echo "export HUMAN_PASSWORD_ITERS=1000000" >> secrets.sh
-echo "export HCAPTCHA_SECRET=" >> secrets.sh
+echo "export HCAPTCHA_SECRET_KEY=" >> secrets.sh
 echo "export HCAPTCHA_DISABLED=0" >> secrets.sh
 sudo chmod +x secrets.sh
 sudo chown root secrets.sh
