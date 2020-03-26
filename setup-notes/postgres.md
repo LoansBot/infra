@@ -73,7 +73,7 @@ sudo chown root clean_expire_tables.sh
 sudo chgrp root clean_expire_tables.sh
 
 echo "@reboot service docker start; docker start postgres" > dbcron
-echo "@daily yum update -y" >> dbcron
+echo "@daily yum update -y; sleep 60; service docker start; docker start postgres" >> dbcron
 echo "@daily /home/ec2-user/create_backup.sh" >> dbcron
 echo "@hourly /home/ec2-user/clean_expire_tables.sh" >> dbcron
 sudo crontab dbcron
