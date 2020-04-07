@@ -56,3 +56,38 @@ The tool and infrastructure to solve this must have the following properties:
 - There should be an easy way to set long but not infinite TTL on keys. Most of
   these problems, for example, get to safely assume a user isn't returning
   around a year later rather than a day.
+
+## Setup
+
+ArangoDB Community Edition (self-managed) on a single node.
+
+```bash
+sudo yum -y update
+sudo yum install -y docker
+sudo service docker start
+sudo docker pull arangodb/arangodb
+
+export ARANGOHOST=$(hostname -i | grep -Eo '10(\.[0-9]+){3}')
+echo '#!/usr/bin/env bash' > secrets.sh
+echo "export ARANGOHOST=$ARANGOHOST" >> secrets.sh
+echo "export ARANGOPORT=8529" >> secrets.sh
+sudo chmod +x secrets.sh
+sudo chown root secrets.sh
+sudo chgrp root secrets.sh
+
+echo '#!/usr/bin/env bash' > start_arango.sh
+echo "source secrets.sh" >> start_arango.sh
+echo 'docker run -d -e ARANGO_NO_AUTH=1 -p $ARANGOHOST:10000:$ARANGOPORT arangodb/arangodb arangod --server.endpoint tcp://0.0.0.0:$ARANGOPORT' >> start_arango.sh
+sudo chmod +x start_arango.sh
+sudo chown root start_arango.sh
+sudo chgrp root start_arango.sh
+
+sudo ./start_arango.sh
+```
+
+```bash
+echo "@daily yum -y update" > dbcron
+echo "@reboot service docker start; sleep 5; /home/ec2-user/start_arango.sh" >> dbcron
+sudo crontab dbcron
+sudo rm dbcron
+```
