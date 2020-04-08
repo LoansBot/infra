@@ -77,7 +77,7 @@ sudo chgrp root secrets.sh
 
 echo '#!/usr/bin/env bash' > start_arango.sh
 echo "source secrets.sh" >> start_arango.sh
-echo 'docker run -d -e ARANGO_NO_AUTH=1 -p $ARANGOHOST:10000:$ARANGOPORT arangodb/arangodb arangod --server.endpoint tcp://0.0.0.0:$ARANGOPORT' >> start_arango.sh
+echo 'docker run -d -e ARANGO_NO_AUTH=1 -p $ARANGOHOST:$ARANGOPORT:8529 arangodb/arangodb arangod --server.endpoint tcp://0.0.0.0:8529' >> start_arango.sh
 sudo chmod +x start_arango.sh
 sudo chown root start_arango.sh
 sudo chgrp root start_arango.sh
