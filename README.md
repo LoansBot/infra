@@ -50,8 +50,15 @@ handled by a third-party (Amazon). For the other data stores, we purchase the in
   to raw sockets. Furthermore, going through rabbit mq allows for a large body
   of metrics (throughput, number in queue, etc) that would not otherwise be
   simple to get.
+- The TTL key-value store. This is a pure key-value store with time based
+  expiration of keys and is mainly backed by solid-state drives. This is
+  used for caching for documents where there may be a very significant delay
+  between reads, i.e., a value might be written once per year and read once
+  per month. The TTL for keys within this store are typically around a year.
+  It should be assumed for cost estimates that the key-space is held in RAM.
 - The S3 bucket. Backups are stored here, and large assets such as images
-  or videos are served from here.
+  or videos are served from here. In general this is for large files (>1kb)
+  which are not easily regenerable.
 
 ### Other Pre-Built Services
 

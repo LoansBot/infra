@@ -58,6 +58,7 @@ Each instance has an associated minimum EBS volume of 8gb at $0.10/gb/mo
 - Reddit-Proxy: `t3a.nano` (2 vCPU @ 5%, 512mb mem) at $1.68/mo + $0.80/mo
 - LoansBot: `t3a.nano` (2 vCPU @ 5%, 512mb mem) at $1.68/mo + $0.80/mo
 - NAT Instance: `t3a.nano` (2 vCPU @ 5%, 512mb mem) at $1.68/mo + $0.80/mo
+- TTL Key-Value: `t3a.micro` (2 vCPU @ 10%, 1gb mem) at $3.44/mo + $0.80/mo
 
 Transfer estimates:
 
@@ -110,13 +111,13 @@ $28/year = $2.33/mo
 
 ## Total Cost Estimates
 
-- EC2 Instances: $56.50/mo
+- EC2 Instances: $60.74/mo
 - EC2 Data Transfer Out: $7.25/mo
 - S3: $1.41/mo
 - Website Registration: $2.33/mo
 
-Estimated net before taxes: $67.49/mo
+Estimated net before taxes: $71.73/mo
 
-Estimated taxes (11%): $7.42/mo
+Estimated taxes (11%): $7.89/mo
 
-Estiamted net after taxes: $74.91/mo
+Estiamted net after taxes: $79.62/mo
