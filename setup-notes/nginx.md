@@ -57,3 +57,10 @@ wget https://dl.eff.org/certbot-auto
 chmod a+x certbot-auto
 sudo ./certbot-auto --nginx -d staging.redditloans.com
 ```
+
+And finally enable http2, which is done by adding the "http2" part in this section:
+
+```conf
+    listen [::]:443 ssl ipv6only=on http2; # managed by Certbot
+    listen 443 ssl http2; # managed by Certbot
+```
