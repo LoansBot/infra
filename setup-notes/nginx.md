@@ -29,6 +29,7 @@ server {
         location ^~ /api/ {
             proxy_pass http://10.0.0.38:8000/;
             proxy_cache my_cache;
+            add_header X-Cache-Status $upstream_cache_status;
         }
 
         location / {
