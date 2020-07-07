@@ -23,6 +23,7 @@ cache and disable the pre-HTTP/1.1 style caching.
 ```conf
         location ^~ /api/ {
             proxy_pass http://10.0.0.38:8000/;
+            proxy_cache_path /home/ec2-user/nginx-cache levels=1:2 keys_zone=my_cache:10m inactive=60m use_temp_path=off;
         }
 
         location / {
