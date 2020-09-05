@@ -68,6 +68,8 @@ echo ". /home/ec2-user/secrets.sh" >> clean_expire_tables.sh
 echo "psql -c \"DELETE FROM authtokens WHERE expires_at < NOW()\"" >> clean_expire_tables.sh
 echo "psql -c \"DELETE FROM claim_tokens WHERE expires_at < NOW()\"" >> clean_expire_tables.sh
 echo "psql -c \"DELETE FROM log_events WHERE created_at < NOW() - INTERVAL '7 days'\"" >> clean_expire_tables.sh
+echo "psql -c \"DELETE FROM endpoint_users WHERE endpoint_id IN (SELECT endpoints.id FROM endpoints WHERE sunsets_on IS NOT NULL AND sunsets_on < CURRENT_DATE)\"" >> clean_expire_tables.sh
+echo "psql -c \"DELETE FROM endpoint_alerts WHERE endpoint_id IN (SELECT endpoints.id FROM endpoints WHERE sunsets_on IS NOT NULL AND sunsets_on < CURRENT_DATE - INTERVAL '30 days')\"" >> clean_expire_tables.sh
 sudo chmod +x clean_expire_tables.sh
 sudo chown root clean_expire_tables.sh
 sudo chgrp root clean_expire_tables.sh
