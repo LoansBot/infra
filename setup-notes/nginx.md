@@ -31,6 +31,7 @@ server {
             proxy_cache my_cache;
             proxy_cache_methods GET;
             proxy_cache_bypass $http_pragma;
+            proxy_set_header X-Real-IP $remote_addr;
             add_header X-Cache-Status $upstream_cache_status;
         }
 
