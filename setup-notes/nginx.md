@@ -36,6 +36,15 @@ server {
             add_header X-Cache-Status $upstream_cache_status;
         }
 
+        location /mobile_query.php {
+            etag off;
+            if_modified_since off;
+            add_header Last-Modified "";
+            add_header Cache-Control "public, max-age=86400, stale-while-revalidate=604800, stale-if-error=604800";
+            add_header Content-Type "text/html";
+            add_header Content-Disposition "inline";
+        }
+
         location / {
             etag off;
             if_modified_since off;
