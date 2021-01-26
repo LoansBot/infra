@@ -68,7 +68,8 @@ Also ensure that gzip is configured and the favicon is cached where possible.
             add_header Last-Modified "";
             add_header Cache-Control "public, max-age=604800, stale-while-revalidate=604800, stale-if-error=604800";
         }
-``
+```
+
 And reload the service
 
 ```bash
