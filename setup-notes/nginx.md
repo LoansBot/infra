@@ -50,6 +50,7 @@ server {
             if_modified_since off;
             add_header Last-Modified "";
             add_header Cache-Control "public, max-age=86400, stale-while-revalidate=604800, stale-if-error=604800";
+            add_header X-Frame-Options: "DENY";
         }
 ```
 
