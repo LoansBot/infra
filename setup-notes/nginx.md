@@ -43,6 +43,7 @@ server {
             add_header Cache-Control "public, max-age=86400, stale-while-revalidate=604800, stale-if-error=604800";
             add_header Content-Type "text/html";
             add_header Content-Disposition "inline";
+            add_header X-Frame-Options "DENY";
         }
 
         location / {
@@ -50,7 +51,7 @@ server {
             if_modified_since off;
             add_header Last-Modified "";
             add_header Cache-Control "public, max-age=86400, stale-while-revalidate=604800, stale-if-error=604800";
-            add_header X-Frame-Options: "DENY";
+            add_header X-Frame-Options "DENY";
         }
 ```
 
