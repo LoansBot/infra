@@ -10,7 +10,7 @@ sudo yum -y update
 sudo amazon-linux-extras enable postgresql11
 sudo yum clean metadata
 sudo amazon-linux-extras install -y docker
-sudo yum install -y postgresql
+sudo yum install -y postgresql libpq-devel
 sudo service docker start
 sudo docker run --name postgres -e POSTGRES_USER='ec2-user' -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=postgres -d -p 5432:5432 postgres:11.5
 ```
