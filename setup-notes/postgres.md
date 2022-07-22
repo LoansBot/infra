@@ -12,6 +12,10 @@ sudo yum clean metadata
 sudo amazon-linux-extras install -y docker
 sudo yum install -y postgresql libpq-devel
 sudo service docker start
+# NOTE -> we didn't configure log rotation when setting up the instance,
+# so we have a cron job to truncate the log file. If setting up a new
+# instance, it's better to add these flags: --log-driver local
+# which will rotate the logs
 sudo docker run --name postgres -e POSTGRES_USER='ec2-user' -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=postgres -d -p 5432:5432 postgres:11.5
 ```
 
@@ -74,10 +78,19 @@ sudo chmod +x clean_expire_tables.sh
 sudo chown root clean_expire_tables.sh
 sudo chgrp root clean_expire_tables.sh
 
+# if we forgot log rotation
+echo "#/usr/bin/env bash" > clean_logs.sh
+echo "sudo truncate -s 0 $(sudo docker inspect --format='{{.LogPath}}' $(sudo docker ps | head -n 2 | tail -n 1 | cut -d" " -f1))" >> clean_logs.sh
+chmod +x clean_logs.sh
+chown root clean_logs.sh
+chgrp root clean_logs.sh
+
 echo "@reboot service docker start; docker start postgres" > dbcron
 echo "@daily yum update -y; sleep 60; service docker start; docker start postgres" >> dbcron
 echo "@daily /home/ec2-user/create_backup.sh" >> dbcron
 echo "@hourly /home/ec2-user/clean_expire_tables.sh" >> dbcron
+# if we forgot log rotation
+echo "@monthly /home/ec2-user/clean_logs.sh" >> dbcron
 sudo crontab dbcron
 sudo rm dbcron
 ```
