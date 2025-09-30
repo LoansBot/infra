@@ -42,7 +42,7 @@ done by AWS.
 
 ## Details
 
-All instances are purchased on a 3 year no-upfront convertible contract. S3
+Most instances are purchased on a 3 year no-upfront convertible contract. S3
 prices are based on usage All services run on the default AWS linux AMI.
 
 All numbers are derived from
@@ -54,7 +54,7 @@ Each instance has an associated minimum EBS volume of 8gb at $0.10/gb/mo
 - Web worker: 1 `t3a.small` (2 vCPU @ 20%, 2gb mem) running 16 actual workers at $6.87/mo + $0.80/mo
 - Memcached: `t3a.nano` (2 vCPU @ 5%, 512mb mem) at $1.68/mo + $0.80/mo
 - Postgres: `m5a.large` (2 vCPU @ 100%, 8gb mem) at $31.39/mo + $0.80/mo
-- RabbitMQ: `t3a.nano` (2 vCPU @ 5%, 512mb mem) at $1.68/mo + $0.80/mo
+- RabbitMQ: `t3a.micro` (2 vCPU @ 10%, 1gb mem) purchased all-upfront 09/29/2025 due to memory issues @ $2.58/mo ($93/36 months) + $0.80/mo
 - Reddit-Proxy: `t3a.nano` (2 vCPU @ 5%, 512mb mem) at $1.68/mo + $0.80/mo
 - LoansBot: `t3a.nano` (2 vCPU @ 5%, 512mb mem) at $1.68/mo + $0.80/mo
 - NAT Instance: `t3a.nano` (2 vCPU @ 5%, 512mb mem) at $1.68/mo + $0.80/mo
@@ -121,3 +121,4 @@ Estimated net before taxes: $71.73/mo
 Estimated taxes (11%): $7.89/mo
 
 Estiamted net after taxes: $79.62/mo
+
