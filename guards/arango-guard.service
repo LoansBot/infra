@@ -1,0 +1,9 @@
+[Unit]
+Description=Ensure ArangoDB is answering (crash/upgrade recovery)
+Documentation=https://github.com/arango/arango
+After=docker.service
+Wants=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/arango-guard

@@ -1,0 +1,130 @@
+#!/bin/bash
+# arango-guard — keep ArangoDB actually serving, not merely "restart=always".
+#
+# Why this exists: on 2026-10-13 the nightly `yum -y update` upgraded
+# docker/containerd, the daemon shut down mid-upgrade, and Docker *cancelled*
+# the container's restart ("ShouldRestart failed ... daemonShuttingDown=true
+# error=restart canceled"). The fresh daemon then failed to launch it with
+# "failed to create TTRPC connection: unsupported protocol". Because the
+# restart was cancelled rather than attempted, --restart always gives up
+# permanently: nothing retried, and ArangoDB stayed dead for 9 days while every
+# DB-backed API route returned 500 (the rate limiter keeps its tokens in Arango).
+#
+# So: a policy is not a supervisor. This checks the *service*, not the state
+# flag, and repairs in escalating steps.
+#
+# Two hard-won details, both of which cost an outage to learn:
+#   1. The container publishes on the host's PRIVATE IP (10.0.0.61:8529), not
+#      127.0.0.1. Checking localhost reported 000 on a perfectly healthy server,
+#      so a "fix" built on it restart-loops Arango every run. Read ARANGOHOST
+#      from secrets.sh instead of guessing.
+#   2. One failed probe is not an outage. Require two consecutive failures
+#      before touching anything, so a slow moment cannot become a restart loop.
+set -u
+
+CONTAINER=magical_chaplygin
+APP_HOME=/home/ec2-user
+
+log() { echo "arango-guard: $*"; }
+
+endpoint() {
+    local host='' port=''
+    if [ -r "$APP_HOME/secrets.sh" ]; then
+        host=$(sed -n 's/^export ARANGOHOST=//p' "$APP_HOME/secrets.sh" | tr -d '"'"'"' \r' | tail -1)
+        port=$(sed -n 's/^export ARANGOPORT=//p' "$APP_HOME/secrets.sh" | tr -d '"'"'"' \r' | tail -1)
+    fi
+    [ -n "$host" ] || host=$(hostname -I 2>/dev/null | awk '{print $1}')
+    [ -n "$port" ] || port=8529
+    echo "http://${host}:${port}/_api/version"
+}
+
+# Any HTTP status proves arangod is serving: /_api/version is behind auth, so a
+# healthy server answers 401. curl prints 000 when nothing is listening.
+answering() {
+    local code
+    code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 5 "$ENDPOINT" 2>/dev/null) || true
+    [ -n "${code:-}" ] && [ "$code" != "000" ]
+}
+
+wait_answering() {
+    local tries=${1:-30} i
+    for ((i = 0; i < tries; i++)); do
+        answering && return 0
+        sleep 2
+    done
+    return 1
+}
+
+ensure_docker() {
+    docker info >/dev/null 2>&1 && return 0
+    log "docker daemon not responding; starting it"
+    systemctl start docker >/dev/null 2>&1 || true
+    local i
+    for ((i = 0; i < 30; i++)); do
+        docker info >/dev/null 2>&1 && return 0
+        sleep 2
+    done
+    return 1
+}
+
+start_container() {
+    local state
+    state=$(docker inspect -f '{{.State.Running}}' "$CONTAINER" 2>/dev/null) || state=missing
+    log "container state=${state:-unknown}"
+    case "$state" in
+        true)
+            log "container claims to be running but is not serving; restarting"
+            docker restart "$CONTAINER" >/dev/null 2>&1 || true
+            ;;
+        missing)
+            log "container is gone; re-creating it from start_arango.sh (data is bind-mounted)"
+            (cd "$APP_HOME" && bash ./start_arango.sh) >/dev/null 2>&1 || true
+            ;;
+        *)
+            log "container is stopped; starting it"
+            docker start "$CONTAINER" >/dev/null 2>&1 || true
+            ;;
+    esac
+}
+
+ENDPOINT=$(endpoint)
+
+if answering; then
+    exit 0
+fi
+
+log "probe 1 failed for $ENDPOINT — confirming before acting"
+sleep 5
+if answering; then
+    log "answered on the second probe; treating the first as transient"
+    exit 0
+fi
+
+log "ArangoDB is not answering on $ENDPOINT — recovering"
+
+if ! ensure_docker; then
+    log "docker daemon will not come up; giving up"
+    exit 1
+fi
+
+start_container
+if wait_answering 30; then
+    log "recovered"
+    exit 0
+fi
+
+# The observed failure mode lives here: a container that cannot be started
+# because the daemon's shim/containerd pairing is broken. Restarting the daemon
+# re-establishes it; the container then starts normally.
+log "still not answering; restarting the docker daemon and retrying"
+systemctl restart docker >/dev/null 2>&1 || true
+if ensure_docker; then
+    start_container
+    if wait_answering 45; then
+        log "recovered after docker daemon restart"
+        exit 0
+    fi
+fi
+
+log "FAILED to recover ArangoDB"
+exit 1

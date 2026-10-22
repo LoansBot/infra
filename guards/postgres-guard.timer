@@ -1,0 +1,12 @@
+[Unit]
+Description=Run postgres-guard every 2 minutes
+
+[Timer]
+# Absolute schedule. OnBootSec+OnUnitActiveSec computes against the last
+# activation and yields a NEXT in the past on a long-uptime host (this box has
+# not booted since 2024-06-08), i.e. a timer that never fires.
+OnCalendar=*:0/2
+AccuracySec=10s
+
+[Install]
+WantedBy=timers.target

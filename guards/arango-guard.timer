@@ -1,0 +1,12 @@
+[Unit]
+Description=Run arango-guard every 2 minutes
+
+[Timer]
+# Absolute schedule, deliberately. OnBootSec+OnUnitActiveSec computes against
+# the last activation, and on a box whose uptime is years (this one booted
+# 2022-06-21) that yields a NEXT in the past and the timer never fires.
+OnCalendar=*:0/2
+AccuracySec=10s
+
+[Install]
+WantedBy=timers.target

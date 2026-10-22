@@ -1,0 +1,138 @@
+#!/bin/bash
+# postgres-guard — keep the redditloans Postgres actually serving.
+#
+# The box had `docker update --restart=no` on the container and depended on an
+# @reboot cron line for recovery, so a Docker daemon restart or a package
+# upgrade could leave the database down with nothing to bring it back. (The
+# ArangoDB box was down for exactly that reason for 9 days: see arango-guard.)
+#
+# Deliberate difference from arango-guard: **this guard never creates the
+# container**. Postgres's data lives in a Docker *named volume*
+# (900233cb5cc0897a8c5489e73a19beed15b88d096017cfa457a96c42f9721b72 ->
+# /var/lib/postgresql/data). A `docker run` without `-v` would attach a brand
+# new empty volume, so the API would answer 200 against an empty database and
+# every reader would see a website with no loans in it. Missing container is
+# therefore a human decision, not an automatic one.
+#
+# Health is judged with pg_isready, not a TCP connect: an accepting socket that
+# never answers the protocol is a failure mode a connect() cannot see.
+set -u
+
+CONTAINER=postgres
+DATA_VOLUME=900233cb5cc0897a8c5489e73a19beed15b88d096017cfa457a96c42f9721b72
+
+log() { echo "postgres-guard: $*"; }
+
+# Derive the published address from the container itself. Never hardcode, and
+# never assume loopback: ArangoDB on the neighbouring box publishes only on its
+# private IP, and a loopback probe there reported "down" on a healthy server.
+endpoint() {
+    local pub host port
+    pub=$(docker port "$CONTAINER" 5432/tcp 2>/dev/null | head -1)
+    host=${pub%:*}
+    port=${pub##*:}
+    case "$host" in
+        0.0.0.0 | :: | '') host=127.0.0.1 ;;
+    esac
+    [ -n "$port" ] && [ "$port" != "$pub" ] || port=5432
+    POSTGRES_HOST=$host
+    POSTGRES_PORT=$port
+}
+
+# pg_isready exits 0 only when the server accepts connections: it does the real
+# handshake, so "socket open but silent" reads as failure.
+answering() {
+    pg_isready -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" -q >/dev/null 2>&1
+}
+
+wait_answering() {
+    local tries=${1:-30} i
+    for ((i = 0; i < tries; i++)); do
+        answering && return 0
+        sleep 2
+    done
+    return 1
+}
+
+ensure_docker() {
+    docker info >/dev/null 2>&1 && return 0
+    log "docker daemon not responding; starting it"
+    systemctl start docker >/dev/null 2>&1 || true
+    local i
+    for ((i = 0; i < 30; i++)); do
+        docker info >/dev/null 2>&1 && return 0
+        sleep 2
+    done
+    return 1
+}
+
+start_container() {
+    local state
+    state=$(docker inspect -f '{{.State.Running}}' "$CONTAINER" 2>/dev/null) || state=missing
+    log "container state=${state:-unknown}"
+    case "$state" in
+        true)
+            log "container claims to be running but is not accepting connections; restarting"
+            docker restart "$CONTAINER" >/dev/null 2>&1 || true
+            ;;
+        missing)
+            log "REFUSING TO ACT: container '$CONTAINER' does not exist."
+            log "Postgres data lives in docker volume ${DATA_VOLUME}."
+            log "A 'docker run' without that volume would serve an EMPTY database."
+            log "Re-attach it by hand: docker run -d --name ${CONTAINER} --restart always \\"
+            log "  -v ${DATA_VOLUME}:/var/lib/postgresql/data -p 5432:5432 postgres:11.5"
+            return 1
+            ;;
+        *)
+            log "container is stopped; starting it"
+            docker start "$CONTAINER" >/dev/null 2>&1 || true
+            ;;
+    esac
+    return 0
+}
+
+endpoint
+log "probing ${POSTGRES_HOST}:${POSTGRES_PORT} with pg_isready"
+
+if answering; then
+    exit 0
+fi
+
+log "probe 1 failed — confirming before acting"
+sleep 5
+if answering; then
+    log "answered on the second probe; treating the first as transient"
+    exit 0
+fi
+
+log "Postgres is not accepting connections — recovering"
+
+if ! ensure_docker; then
+    log "docker daemon will not come up; giving up"
+    exit 1
+fi
+
+# The daemon is back, so the published address may have changed; re-derive it.
+endpoint
+
+start_container || exit 1
+if wait_answering 30; then
+    log "recovered"
+    exit 0
+fi
+
+# Same repair as arango-guard: a container that cannot start because the
+# daemon's shim/containerd pairing broke is fixed by restarting the daemon.
+log "still not accepting; restarting the docker daemon and retrying"
+systemctl restart docker >/dev/null 2>&1 || true
+if ensure_docker; then
+    endpoint
+    start_container || exit 1
+    if wait_answering 45; then
+        log "recovered after docker daemon restart"
+        exit 0
+    fi
+fi
+
+log "FAILED to recover Postgres"
+exit 1
